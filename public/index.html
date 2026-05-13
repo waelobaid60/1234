@@ -2,60 +2,42 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دردشة وائل الجماعية</title>
+    <!-- هذا السطر هو المسؤول عن الربط -->
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e5ddd5; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 95vh; }
-        h3 { text-align: center; color: #075e54; margin: 10px 0; }
-        #chat { flex: 1; border: 1px solid #ccc; background: #fff; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .msg-container { margin: 8px 0; display: flex; flex-direction: column; }
-        .user-name { font-size: 0.75em; color: #128c7e; margin-bottom: 3px; font-weight: bold; padding: 0 5px; }
-        .msg-text { background: #fff; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 85%; position: relative; border: 1px solid #eee; word-wrap: break-word; }
-        .my-msg .msg-text { background: #dcf8c6; align-self: flex-end; border: none; }
-        .my-msg .user-name { align-self: flex-end; }
-        .input-area { display: flex; gap: 8px; padding-top: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
-        button { background: #075e54; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        body { font-family: sans-serif; background: #e5ddd5; padding: 20px; display: flex; flex-direction: column; height: 90vh; }
+        #chat { flex: 1; border: 1px solid #ddd; background: #fff; overflow-y: auto; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; border-radius: 8px; }
+        .msg { background: #dcf8c6; padding: 10px; margin: 5px 0; border-radius: 10px; align-self: flex-start; max-width: 80%; }
+        .user-name { font-size: 0.8em; font-weight: bold; color: #075e54; margin-bottom: 2px; }
     </style>
 </head>
 <body>
-    <h3>دردشة جماعية (حذف تلقائي 12 ساعة)</h3>
+    <h3>الدردشة الجماعية (12 ساعة)</h3>
     <div id="chat"></div>
-    <div class="input-area">
-        <input type="text" id="text" placeholder="اكتب رسالتك هنا..." onkeypress="checkEnter(event)">
-        <button onclick="send()">إرسال</button>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="text" style="flex: 1; padding: 10px;" placeholder="اكتب رسالتك...">
+        <button onclick="send()" style="padding: 10px 20px;">إرسال</button>
     </div>
 
     <script>
-        const socket = io();
-        const LIMIT = 12 * 60 * 60 * 1000; // صلاحية الرسالة 12 ساعة
+        const socket = io(); // تفعيل الربط
+        const LIMIT = 12 * 60 * 60 * 1000;
 
-        // نظام تسجيل الاسم
-        let userName = localStorage.getItem('chat_user_name');
-        if (!userName) {
-            userName = prompt("مرحباً بك! أدخل اسمك المستعار للدردشة:");
-            if (!userName || userName.trim() === "") userName = "زائر_" + Math.floor(Math.random() * 1000);
-            localStorage.setItem('chat_user_name', userName);
-        }
-
-        function checkEnter(e) { if(e.key === 'Enter') send(); }
+        let userName = localStorage.getItem('chat_user_name') || prompt("أدخل اسمك:");
+        if(!userName) userName = "زائر";
+        localStorage.setItem('chat_user_name', userName);
 
         function send() {
             const el = document.getElementById('text');
-            if(!el.value.trim()) return;
-            
-            const data = { 
-                user: userName, 
-                txt: el.value, 
-                time: Date.now() 
-            };
-            
-            socket.emit('chat message', data);
+            if(!el.value) return;
+            const data = { user: userName, txt: el.value, time: Date.now() };
+            socket.emit('chat message', data); // إرسال للسيرفر
             el.value = '';
         }
 
         socket.on('chat message', (data) => {
+            // استقبال من السيرفر وحفظ محلي للحذف التلقائي
             let msgs = JSON.parse(localStorage.getItem('msgs') || '[]');
             msgs.push(data);
             localStorage.setItem('msgs', JSON.stringify(msgs));
@@ -66,23 +48,16 @@
             const box = document.getElementById('chat');
             let msgs = JSON.parse(localStorage.getItem('msgs') || '[]');
             const now = Date.now();
-            
-            // تصفية الرسائل وحذف ما تجاوز 12 ساعة
             msgs = msgs.filter(m => (now - m.time) < LIMIT);
             localStorage.setItem('msgs', JSON.stringify(msgs));
-            
             box.innerHTML = msgs.map(m => `
-                <div class="msg-container ${m.user === userName ? 'my-msg' : ''}">
+                <div class="msg">
                     <div class="user-name">${m.user}</div>
-                    <div class="msg-text">${m.txt}</div>
-                </div>
-            `).join('');
-            
+                    <div>${m.txt}</div>
+                </div>`).join('');
             box.scrollTop = box.scrollHeight;
         }
-        
         show();
-        setInterval(show, 60000); // تحديث العرض وفحص الحذف كل دقيقة
     </script>
 </body>
 </html>
