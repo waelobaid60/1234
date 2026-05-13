@@ -12,12 +12,7 @@ const io = new Server(server);
 const PORT = 8080; 
 
 // الرابط النهائي المعتمد على بيانات الصورة 31407.jpg
-const mongoURI = "mongodb+srv://admin:1q2w3e4r5t@cluster0.pwloqvx.mongodb.net/?appName=Cluster0"; 
-
-// الاتصال بـ MongoDB
-mongoose.connect(mongoURI)
-    .then(() => console.log("تم الاتصال بـ MongoDB بنجاح!"))
-    .catch(err => console.error("فشل الاتصال بقاعدة البيانات:", err));
+const mongoURI = "mongodb+srv://admin:Wael2026@cluster0.pwloqvx.mongodb.net/?appName=Cluster0";
 
 // إعداد نظام الرسائل مع حذف تلقائي بعد 12 ساعة
 const msgSchema = new mongoose.Schema({
