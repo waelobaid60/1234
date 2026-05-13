@@ -1,6 +1,16 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+    socket.on('chat message', (data) => {
+        io.emit('chat message', data); // هذه هي المسؤولة عن إرسالها للطرف الآخر
+    });
+});
+
+const { Server } = require('socket.io');
 const path = require('path');
 
 const app = express();
