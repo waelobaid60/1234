@@ -8,30 +8,35 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = 8080; // المنفذ الناجح حسب الصورة 31393.jpg
+// المنفذ المتوافق مع Railway
+const PORT = 8080; 
 
-// --- إعداد MongoDB ---
-// استبدل الرابط أدناه برابط الاتصال الخاص بك من MongoDB Atlas
-const mongoURI = "رابط_قاعدة_بياناتك_هنا"; 
+// الرابط النهائي المعتمد على بيانات الصورة 31407.jpg
+const mongoURI = "mongodb+srv://admin:1q2w3e4r5t@cluster0.pwloqvx.mongodb.net/?appName=Cluster0"; 
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("تم الاتصال بـ MongoDB بنجاح"))
-    .catch(err => console.log("خطأ في اتصال MongoDB:", err));
+// الاتصال بـ MongoDB
+mongoose.connect(mongoURI)
+    .then(() => console.log("تم الاتصال بـ MongoDB بنجاح!"))
+    .catch(err => console.error("فشل الاتصال بقاعدة البيانات:", err));
 
-// تعريف شكل الرسالة (Schema)
+// إعداد نظام الرسائل مع حذف تلقائي بعد 12 ساعة
 const msgSchema = new mongoose.Schema({
     user: String,
     txt: String,
-    createdAt: { type: Date, default: Date.now, expires: 43200 } // الحذف التلقائي بعد 12 ساعة (43200 ثانية)
+    createdAt: { type: Date, default: Date.now, expires: 43200 } 
 });
 const Message = mongoose.model('Message', msgSchema);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', async (socket) => {
-    // إرسال آخر الرسائل للمستخدم عند دخوله فوراً
-    const oldMessages = await Message.find().sort({ _id: 1 });
-    socket.emit('load messages', oldMessages);
+    try {
+        // تحميل الرسائل القديمة فور دخول المستخدم
+        const oldMessages = await Message.find().sort({ _id: 1 });
+        socket.emit('load messages', oldMessages);
+    } catch (err) {
+        console.error("خطأ في جلب البيانات:", err);
+    }
 
     socket.on('chat message', async (data) => {
         const newMsg = new Message({ user: data.user, txt: data.txt });
@@ -41,5 +46,5 @@ io.on('connection', async (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`السيرفر يعمل على المنفذ ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
