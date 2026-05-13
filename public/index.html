@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دردشة وائل</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        #chat-box { height: 400px; border: 1px solid #ccc; background: #fff; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .message { background: #e1ffc7; padding: 8px; margin: 5px 0; border-radius: 5px; position: relative; }
+        .time { font-size: 0.7em; color: #888; display: block; }
+    </style>
+</head>
+<body>
+    <h2>غرفة الدردشة</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا...">
+    <button onclick="sendMessage()">إرسال</button>
+
+    <script>
+        // ميزة الحذف التلقائي كل 12 ساعة
+        const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+
+        function sendMessage() {
+            const input = document.getElementById('msgInput');
+            if (input.value.trim() === "") return;
+
+            const msgData = {
+                text: input.value,
+                timestamp: Date.now() // حفظ وقت الإرسال
+            };
+
+            saveAndDisplay(msgData);
+            input.value = "";
+        }
+
+        function saveAndDisplay(data) {
+            let messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            messages.push(data);
+            localStorage.setItem('messages', JSON.stringify(messages));
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const chatBox = document.getElementById('chat-box');
+            let messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            const now = Date.now();
+
+            // تصفية الرسائل وحذف ما تجاوز 12 ساعة
+            const validMessages = messages.filter(m => (now - m.timestamp) < TWELVE_HOURS);
+            localStorage.setItem('messages', JSON.stringify(validMessages));
+
+            chatBox.innerHTML = validMessages.map(m => `
+                <div class="message">
+                    ${m.text}
+                    <span class="time">${new Date(m.timestamp).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // فحص الرسائل عند فتح الصفحة وتحديثها كل دقيقة
+        renderMessages();
+        setInterval(renderMessages, 60000); 
+    </script>
+</body>
+</html>
