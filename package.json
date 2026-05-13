@@ -1,14 +1,11 @@
-
 {
-  "name": "chat-app-12h",
-    "version": "1.0.0",
-      "description": "Chat app with auto-delete",
-        "main": "server.js",
-          "scripts": {
-              "start": "node server.js"
-                },
-                  "dependencies": {
-                      "express": "^4.18.2"
-                        }
-                        }
-                        
+  "name": "chat-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
