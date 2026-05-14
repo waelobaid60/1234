@@ -15,12 +15,13 @@
 <body>
 
     <!-- شاشة القفل والاسم -->
-    <div id="lock-screen">
-        <h2 id="lock-title">أدخل رمز الدخول</h2>
-        <input type="password" id="passInput" placeholder="الرمز (1234)">
-        <input type="text" id="nameInput" placeholder="اسمك المستعار" style="display: none;">
-        <button onclick="checkAccess()" id="loginBtn">دخول</button>
-    </div>
+<!-- شاشة طلب الاسم مباشرة (بدون رمز) -->
+<div id="lock-screen">
+    <h2 id="lock-title">أهلاً بك، ما هو اسمك؟</h2>
+    <input type="text" id="nameInput" placeholder="اكتب اسمك هنا..." autocomplete="off">
+    <button onclick="checkAccess()" id="loginBtn">دخول للدردشة</button>
+</div>
+
 
     <header>
         <div class="user-info">
