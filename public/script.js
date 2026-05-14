@@ -1,30 +1,32 @@
 const socket = io();
 let myName = "";
 
-// 1. إدارة الدخول
+// إدارة الدخول بالاسم فقط
 function checkAccess() {
-    const pass = document.getElementById('passInput');
     const nameInp = document.getElementById('nameInput');
-    const title = document.getElementById('lock-title');
 
-    if (pass.style.display !== "none") {
-        if (pass.value === "1234") {
-            pass.style.display = "none";
-            nameInp.style.display = "block";
-            title.innerText = "أهلاً بك، ما هو اسمك؟";
-        } else {
-            alert("الرمز خاطئ!");
-        }
+    if (nameInp.value.trim() !== "") {
+        myName = nameInp.value.trim();
+        document.getElementById('display-name').innerText = myName;
+        document.getElementById('lock-screen').style.display = "none";
+        
+        // حفظ الاسم في المتصفح لسهولة الدخول لاحقاً
+        localStorage.setItem('wael-chat-name', myName);
     } else {
-        if (nameInp.value.trim() !== "") {
-            myName = nameInp.value.trim();
-            document.getElementById('display-name').innerText = myName;
-            document.getElementById('lock-screen').style.display = "none";
-        } else {
-            alert("يرجى كتابة الاسم");
-        }
+        alert("يرجى كتابة الاسم للدخول");
     }
 }
+
+// إضافة ميزة التعرف على الاسم تلقائياً إذا كان مخزناً
+window.onload = () => {
+    const savedName = localStorage.getItem('wael-chat-name');
+    if (savedName) {
+        document.getElementById('nameInput').value = savedName;
+    }
+};
+
+// ... باقي الكود الخاص بـ sendMessage و appendMessage يبقى كما هو بدون تغيير
+
 
 // 2. إرسال الرسائل النصية
 function sendMessage() {
