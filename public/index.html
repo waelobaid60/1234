@@ -3,91 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دردشة وائل - MongoDB</title>
-    
-    <!-- مكتبة Socket.io للاتصال الفوري -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    
+    <title>دردشة وائل الاحترافية</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e5ddd5; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 95vh; }
-        h3 { text-align: center; color: #075e54; margin: 10px 0; font-size: 1.1em; }
-        #chat { flex: 1; border: 1px solid #ccc; background: #fff; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: white; display: flex; flex-direction: column; height: 100vh; }
         
-        .msg-container { margin: 8px 0; display: flex; flex-direction: column; }
-        .user-name { font-size: 0.75em; color: #128c7e; margin-bottom: 3px; font-weight: bold; padding: 0 5px; }
-        .msg-text { background: #fff; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 85%; border: 1px solid #eee; word-wrap: break-word; line-height: 1.4; }
+        /* الهيدر */
+        header { background: #1f1f1f; padding: 15px; text-align: center; border-bottom: 2px solid #00d2ff; }
         
-        /* تمييز رسائلي الخاصة */
-        .my-msg .msg-text { background: #dcf8c6; align-self: flex-end; border: none; }
-        .my-msg .user-name { align-self: flex-end; }
+        /* منطقة الرسائل */
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-box { max-width: 80%; padding: 10px 15px; border-radius: 15px; position: relative; word-wrap: break-word; }
+        .others { background: #2c2c2c; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .mine { background: #005c4b; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .user-name { font-size: 0.8em; color: #00d2ff; margin-bottom: 5px; display: block; }
 
-        .input-area { display: flex; gap: 8px; padding: 10px 0; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 25px; outline: none; font-size: 16px; }
-        button { background: #075e54; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        /* منطقة الإدخال */
+        footer { background: #1f1f1f; padding: 10px; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: none; outline: none; background: #333; color: white; }
+        button { background: #00d2ff; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        
+        /* توافق الجوال */
+        @media (max-width: 600px) {
+            .msg-box { max-width: 90%; }
+            header h2 { font-size: 1.2em; }
+        }
     </style>
 </head>
 <body>
-    <h3>غرفة الدردشة المتصلة بـ MongoDB</h3>
-    <div id="chat"></div>
-    <div class="input-area">
-        <input type="text" id="text" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') send()">
-        <button onclick="send()">إرسال</button>
-    </div>
+    <header><h2>غرفة دردشة وائل 🌐</h2></header>
+    
+    <div id="chat-container"></div>
 
+    <footer>
+        <input id="userName" type="text" placeholder="اسمك..." style="flex: 0.3;">
+        <input id="messageInput" type="text" placeholder="اكتب رسالتك هنا...">
+        <button onclick="sendMessage()">إرسال</button>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        
-        // 1. إدارة اسم المستخدم
-        let userName = localStorage.getItem('chat_user_name');
-        if (!userName) {
-            userName = prompt("مرحباً! أدخل اسمك المستعار:");
-            if (!userName || userName.trim() === "") userName = "زائر_" + Math.floor(Math.random() * 100);
-            localStorage.setItem('chat_user_name', userName);
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('userName');
+        const msgInput = document.getElementById('messageInput');
+
+        // وظيفة إضافة الرسالة للشاشة
+        function appendMessage(data, isOld = false) {
+            const div = document.createElement('div');
+            const currentUser = userInput.value || "مجهول";
+            div.className = `msg-box ${data.user === currentUser ? 'mine' : 'others'}`;
+            div.innerHTML = `<span class="user-name">${data.user}</span>${data.message}`;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // التمرير للأسفل تلقائياً
         }
 
-        // 2. وظيفة إرسال الرسالة
-        function send() {
-            const el = document.getElementById('text');
-            const msg = el.value.trim();
-            if(!msg) return;
-
-            // نرسل البيانات للسيرفر ليقوم بحفظها في MongoDB ونشرها
-            socket.emit('chat message', {
-                user: userName,
-                txt: msg
-            });
-            el.value = '';
-        }
-
-        // 3. استقبال الرسائل السابقة عند فتح الصفحة (من MongoDB)
-        socket.on('load messages', (msgs) => {
-            const box = document.getElementById('chat');
-            box.innerHTML = msgs.map(m => createMsgHTML(m)).join('');
-            scrollToBottom();
+        // تحميل الرسائل القديمة (حل مشكلة undefined)
+        socket.on('load messages', (messages) => {
+            chatContainer.innerHTML = ''; // تنظيف الحاوية
+            messages.forEach(msg => appendMessage(msg));
         });
 
-        // 4. استقبال رسالة جديدة فوراً
+        // استقبال رسالة جديدة
         socket.on('chat message', (data) => {
-            const box = document.getElementById('chat');
-            box.innerHTML += createMsgHTML(data);
-            scrollToBottom();
+            appendMessage(data);
         });
 
-        // وظيفة بناء شكل الرسالة
-        function createMsgHTML(data) {
-            const isMe = data.user === userName;
-            return `
-                <div class="msg-container ${isMe ? 'my-msg' : ''}">
-                    <div class="user-name">${data.user}</div>
-                    <div class="msg-text">${data.txt}</div>
-                </div>
-            `;
+        function sendMessage() {
+            const user = userInput.value.trim();
+            const message = msgInput.value.trim();
+            if (user && message) {
+                socket.emit('chat message', { user, message });
+                msgInput.value = '';
+            } else {
+                alert("يرجى كتابة الاسم والرسالة!");
+            }
         }
 
-        function scrollToBottom() {
-            const box = document.getElementById('chat');
-            box.scrollTop = box.scrollHeight;
-        }
+        // الإرسال عند الضغط على Enter
+        msgInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
     </script>
 </body>
 </html>
