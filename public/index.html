@@ -2,160 +2,134 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دردشة وائل | WAEL CHAT</title>
-    
-    <!-- إعدادات PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0088cc">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5962/5962463.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wael Chat - Firebase</title>
     <style>
-        :root {
-            --primary-color: #0088cc;
-            --bg-dark: #0f172a;
-            --chat-bg: #1e293b;
-            --text-main: #f8fafc;
-            --my-msg: #0284c7;
-            --other-msg: #334155;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-
-        html, body { height: 100%; margin: 0; overflow: hidden; }
-
-        body { 
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-        }
-
-        header { 
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-        }
-
-        header h2 { font-size: 1rem; color: var(--primary-color); }
-        .status { font-size: 0.7rem; color: #22c55e; display: flex; align-items: center; gap: 5px; }
-        .status::before { content: ''; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; }
-
-        #chat-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
-            background-size: 24px 24px;
-        }
-
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
-        .msg-box { padding: 8px 14px; border-radius: 15px; font-size: 0.9rem; word-wrap: break-word; }
-        .user-name { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; }
-
-        .mine { align-self: flex-end; }
-        .mine .msg-box { background: var(--my-msg); color: white; border-bottom-right-radius: 2px; }
-        .mine .user-name { color: #bae6fd; text-align: left; }
-
-        .others { align-self: flex-start; }
-        .others .msg-box { background: var(--other-msg); color: white; border-bottom-left-radius: 2px; }
-        .others .user-name { color: #94a3b8; }
-
-        footer { 
-            background: #1e293b; 
-            padding: 10px; 
-            display: flex; 
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-        }
-
-        .input-group { flex: 1; display: flex; background: #334155; border-radius: 20px; align-items: center; padding: 0 10px; }
-        #userName { border: none; background: transparent; color: #0088cc; width: 55px; font-weight: bold; border-left: 1px solid #475569; outline: none; font-size: 0.85rem; padding: 8px 0; }
-        #messageInput { flex: 1; border: none; background: transparent; color: white; padding: 10px; outline: none; font-size: 0.9rem; }
-        #sendBtn { background: var(--primary-color); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        #sendBtn svg { fill: white; width: 18px; height: 18px; transform: rotate(180deg); }
+        /* التنسيقات (CSS) */
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 10px; max-width: 70%; position: relative; word-wrap: break-word; }
+        .mine { align-self: flex-end; background-color: #dcf8c6; }
+        .others { align-self: flex-start; background-color: white; border: 1px solid #ddd; }
+        .user-tag { font-size: 0.8em; color: #555; display: block; margin-bottom: 5px; font-weight: bold; }
+        .delete-btn { cursor: pointer; color: #ff4d4d; font-size: 10px; margin-top: 5px; display: block; text-decoration: underline; }
+        #input-area { padding: 15px; background: white; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        button { padding: 10px 20px; background: #25d366; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        header { background: #075e54; color: white; padding: 15px; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- شاشة الدخول -->
+    <div id="lock-screen">
+        <h2>مرحباً بك في دردشة وائل</h2>
+        <input type="text" id="nameInput" placeholder="أدخل اسمك هنا..." style="flex: none; width: 250px; margin-bottom: 10px;">
+        <button onclick="checkAccess()">دخول</button>
+    </div>
+
     <header>
-        <h2>دردشة وائل ⚡</h2>
-        <div class="status">متصل الآن</div>
+        دردشة: <span id="display-name">...</span>
     </header>
-    
+
     <div id="chat-container"></div>
 
-    <footer>
-        <div class="input-group">
-            <input id="userName" type="text" placeholder="الاسم" maxlength="10">
-            <input id="messageInput" type="text" placeholder="اكتب رسالة..." autocomplete="off">
-        </div>
-        <button id="sendBtn" onclick="sendMessage()">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
-    </footer>
+    <div id="input-area">
+        <input type="text" id="messageInput" placeholder="اكتب رسالتك...">
+        <button onclick="sendMessage()">إرسال</button>
+    </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // تسجيل Service Worker للـ PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
-            });
-        }
+    <!-- البرمجة (JavaScript) بنظام الموديول للربط مع Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, remove, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
 
-        const socket = io();
-        const chatContainer = document.getElementById('chat-container');
-        const userInput = document.getElementById('userName');
-        const msgInput = document.getElementById('messageInput');
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+          apiKey: "AIzaSyDpY95ywUC5E3-Xi5TNGvlZQ1XvP_35zlo",
+          authDomain: "wael-chat-da664.firebaseapp.com",
+          databaseURL: "https://wael-chat-da664-default-rtdb.firebaseio.com",
+          projectId: "wael-chat-da664",
+          storageBucket: "wael-chat-da664.firebasestorage.app",
+          messagingSenderId: "676333359273",
+          appId: "1:676333359273:web:e195ac98a1725e4a3359b8",
+          measurementId: "G-XEMQYJYFW4"
+        };
 
-        if(localStorage.getItem('wael-chat-name')) {
-            userInput.value = localStorage.getItem('wael-chat-name');
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messagesRef = ref(db, 'messages');
 
-        function appendMessage(data) {
-            if(!data.user || !data.message) return;
-            const wrapper = document.createElement('div');
-            const isMine = userInput.value.trim() === data.user;
-            wrapper.className = `msg-wrapper ${isMine ? 'mine' : 'others'}`;
-            wrapper.innerHTML = `<span class="user-name">${data.user}</span><div class="msg-box">${data.message}</div>`;
-            chatContainer.appendChild(wrapper);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+        let myName = localStorage.getItem('wael-chat-name') || "";
 
-        socket.on('load messages', (messages) => {
-            chatContainer.innerHTML = '';
-            messages.forEach(msg => appendMessage(msg));
-        });
-
-        socket.on('chat message', (data) => {
-            appendMessage(data);
-        });
-
-        function sendMessage() {
-            const user = userInput.value.trim();
-            const message = msgInput.value.trim();
-            if (user && message) {
-                localStorage.setItem('wael-chat-name', user);
-                socket.emit('chat message', { user, message });
-                msgInput.value = '';
-                msgInput.focus();
+        // التحقق من الاسم وإخفاء شاشة القفل
+        window.checkAccess = () => {
+            const nameInp = document.getElementById('nameInput');
+            if (nameInp.value.trim() !== "") {
+                myName = nameInp.value.trim();
+                localStorage.setItem('wael-chat-name', myName);
+                document.getElementById('display-name').innerText = myName;
+                document.getElementById('lock-screen').style.display = "none";
             }
+        };
+
+        // إذا كان الاسم محفوظاً مسبقاً
+        if (myName) {
+            document.getElementById('display-name').innerText = myName;
+            document.getElementById('lock-screen').style.display = "none";
         }
 
-        msgInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+        // إرسال الرسالة
+        window.sendMessage = () => {
+            const input = document.getElementById('messageInput');
+            if (input.value.trim() && myName) {
+                push(messagesRef, {
+                    user: myName,
+                    message: input.value.trim(),
+                    timestamp: Date.now()
+                });
+                input.value = "";
+            }
+        };
+
+        // استقبال الرسائل الجديدة
+        onChildAdded(messagesRef, (snapshot) => {
+            appendMessage({ ...snapshot.val(), _id: snapshot.key });
+        });
+
+        // تحديث الواجهة عند الحذف
+        onChildRemoved(messagesRef, (snapshot) => {
+            const el = document.getElementById(snapshot.key);
+            if (el) el.remove();
+        });
+
+        // عرض الرسالة
+        function appendMessage(data) {
+            const chat = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.id = data._id;
+            div.className = `msg ${data.user === myName ? 'mine' : 'others'}`;
+            div.innerHTML = `
+                <span class="user-tag">${data.user}</span>
+                <div>${data.message}</div>
+                ${data.user === myName ? `<span class="delete-btn" onclick="deleteMsg('${data._id}')">حذف للكل</span>` : ''}
+            `;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // حذف الرسالة من قاعدة البيانات
+        window.deleteMsg = (id) => {
+            if(confirm("حذف الرسالة نهائياً؟")) {
+                remove(ref(db, 'messages/' + id));
+            }
+        };
+
+        // دعم الإرسال عبر زر Enter
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     </script>
 </body>
 </html>
