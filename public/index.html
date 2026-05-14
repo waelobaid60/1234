@@ -14,141 +14,116 @@
             --other-msg: #334155;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        /* تعديل أساسي لضمان ثبات العناصر */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* يمنع الصفحة كاملة من السحب */
+        }
 
         body { 
             background-color: var(--bg-dark); 
             color: var(--text-main); 
             display: flex; 
             flex-direction: column; 
-            height: 100vh;
-            overflow: hidden;
         }
 
-        /* رأس الصفحة - تصميم راقي */
+        /* رأس الصفحة الثابت */
         header { 
-            background: rgba(30, 41, 59, 0.8);
+            background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
-            padding: 15px 20px; 
+            padding: 12px 20px; 
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            z-index: 10;
+            flex-shrink: 0; /* يمنع الرأس من الانكماش */
         }
 
-        header h2 { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); }
-        .status { font-size: 0.75rem; color: #22c55e; display: flex; align-items: center; gap: 5px; }
-        .status::before { content: ''; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+        header h2 { font-size: 1rem; color: var(--primary-color); }
+        .status { font-size: 0.7rem; color: #22c55e; display: flex; align-items: center; gap: 5px; }
+        .status::before { content: ''; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; }
 
-        /* حاوية الدردشة */
+        /* منطقة الرسائل - هي الوحيدة التي تتحرك */
         #chat-container { 
             flex: 1; 
             overflow-y: auto; 
-            padding: 20px; 
+            padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 15px;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 32px 32px;
+            gap: 12px;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+            background-size: 24px 24px;
         }
 
-        /* تصميم فقاعة الرسالة */
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; transition: all 0.3s ease; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
         
         .msg-box { 
-            padding: 10px 16px; 
-            border-radius: 18px; 
-            font-size: 0.95rem; 
-            line-height: 1.4;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            position: relative;
+            padding: 8px 14px; 
+            border-radius: 15px; 
+            font-size: 0.9rem; 
+            word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .user-name { 
-            font-size: 0.7rem; 
-            font-weight: bold; 
-            margin-bottom: 4px; 
-            opacity: 0.8;
-            letter-spacing: 0.5px;
-        }
+        .user-name { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; }
 
-        /* رسائلي */
         .mine { align-self: flex-end; }
-        .mine .msg-box { 
-            background: var(--my-msg); 
-            color: white; 
-            border-bottom-right-radius: 4px; 
-        }
+        .mine .msg-box { background: var(--my-msg); color: white; border-bottom-right-radius: 2px; }
         .mine .user-name { color: #bae6fd; text-align: left; }
 
-        /* رسائل الآخرين */
         .others { align-self: flex-start; }
-        .others .msg-box { 
-            background: var(--other-msg); 
-            color: var(--text-main); 
-            border-bottom-left-radius: 4px; 
-        }
+        .others .msg-box { background: var(--other-msg); color: white; border-bottom-left-radius: 2px; }
         .others .user-name { color: #94a3b8; }
 
-        /* منطقة الإدخال - ترتيب نظيف */
+        /* شريط الإدخال الثابت في الأسفل */
         footer { 
             background: #1e293b; 
-            padding: 15px 20px; 
+            padding: 10px; 
             display: flex; 
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             border-top: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0; /* يمنع الفوتر من الاختفاء */
         }
 
         .input-group {
             flex: 1;
             display: flex;
             background: #334155;
-            border-radius: 25px;
-            padding: 5px 15px;
+            border-radius: 20px;
             align-items: center;
+            padding: 0 10px;
         }
 
         #userName { 
-            border: none; background: transparent; color: var(--primary-color);
-            width: 80px; font-weight: bold; border-left: 1px solid #475569; margin-left: 10px;
-            outline: none; font-size: 0.9rem;
+            border: none; background: transparent; color: #0088cc;
+            width: 55px; font-weight: bold; border-left: 1px solid #475569;
+            outline: none; font-size: 0.85rem; padding: 8px 0;
         }
 
         #messageInput { 
             flex: 1; border: none; background: transparent; color: white; 
-            padding: 10px 5px; outline: none; font-size: 0.95rem;
+            padding: 10px; outline: none; font-size: 0.9rem;
         }
 
         #sendBtn { 
             background: var(--primary-color); 
             border: none; 
-            width: 45px; 
-            height: 45px; 
+            width: 40px; height: 40px; 
             border-radius: 50%; 
             cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
         }
 
-        #sendBtn:active { transform: scale(0.9); }
+        #sendBtn svg { fill: white; width: 18px; height: 18px; transform: rotate(180deg); }
 
-        #sendBtn svg { fill: white; width: 20px; height: 20px; transform: rotate(180deg); }
-
-        /* تحسينات الجوال */
-        @media (max-width: 600px) {
-            .msg-wrapper { max-width: 85%; }
-            #userName { width: 60px; font-size: 0.8rem; }
-            footer { padding: 10px; }
-        }
-
-        /* سكرول بار أنيق */
-        #chat-container::-webkit-scrollbar { width: 4px; }
-        #chat-container::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        /* سكرول بار بسيط */
+        #chat-container::-webkit-scrollbar { width: 3px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
 <body>
@@ -159,13 +134,13 @@
     </header>
     
     <div id="chat-container">
-        <!-- الرسائل تظهر هنا -->
+        <!-- الرسائل ستظهر هنا -->
     </div>
 
     <footer>
         <div class="input-group">
             <input id="userName" type="text" placeholder="الاسم" maxlength="10">
-            <input id="messageInput" type="text" placeholder="اكتب رسالتك..." autocomplete="off">
+            <input id="messageInput" type="text" placeholder="اكتب رسالة..." autocomplete="off">
         </div>
         <button id="sendBtn" onclick="sendMessage()">
             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -179,17 +154,18 @@
         const userInput = document.getElementById('userName');
         const msgInput = document.getElementById('messageInput');
 
-        // استرجاع الاسم من المتصفح إذا كان مخزناً سابقاً
-        if(localStorage.getItem('chat-name')) {
-            userInput.value = localStorage.getItem('chat-name');
+        // استعادة الاسم المحفوظ
+        if(localStorage.getItem('wael-chat-name')) {
+            userInput.value = localStorage.getItem('wael-chat-name');
         }
 
         function appendMessage(data) {
+            if(!data.user || !data.message) return; // منع الـ undefined
+
             const wrapper = document.createElement('div');
-            const currentUser = userInput.value.trim() || "مجهول";
+            const isMine = userInput.value.trim() === data.user;
             
-            wrapper.className = `msg-wrapper ${data.user === currentUser ? 'mine' : 'others'}`;
-            
+            wrapper.className = `msg-wrapper ${isMine ? 'mine' : 'others'}`;
             wrapper.innerHTML = `
                 <span class="user-name">${data.user}</span>
                 <div class="msg-box">${data.message}</div>
@@ -201,13 +177,11 @@
 
         socket.on('load messages', (messages) => {
             chatContainer.innerHTML = '';
-            messages.forEach(msg => {
-                if(msg.user && msg.message) appendMessage(msg);
-            });
+            messages.forEach(msg => appendMessage(msg));
         });
 
         socket.on('chat message', (data) => {
-            if(data.user && data.message) appendMessage(data);
+            appendMessage(data);
         });
 
         function sendMessage() {
@@ -215,7 +189,7 @@
             const message = msgInput.value.trim();
             
             if (user && message) {
-                localStorage.setItem('chat-name', user); // حفظ الاسم
+                localStorage.setItem('wael-chat-name', user);
                 socket.emit('chat message', { user, message });
                 msgInput.value = '';
                 msgInput.focus();
