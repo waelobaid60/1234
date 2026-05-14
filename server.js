@@ -1,53 +1,70 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = socketIo(server);
 
-// المنفذ المتوافق مع Railway
-const PORT = 8080; 
-
+// رابط الاتصال المحدث بناءً على إعدادات MongoDB Atlas الخاصة بك
 const mongoURI = "mongodb+srv://admin:Wael2026@cluster0.pwloqvx.mongodb.net/chatDB?retryWrites=true&w=majority";
-// الرابط النهائي المعتمد على بيانات الصورة 31407.jpg
-/mongoose.connect(mongoURI, {
+
+// محاولة الاتصال بقاعدة البيانات مع إعدادات المهلة لتجنب التعليق
+mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000 // سيحاول الاتصال لمدة 5 ثوانٍ فقط قبل إعطاء خطأ واضح
+    serverSelectionTimeoutMS: 5000 
 }).then(() => {
-    console.log("تم الاتصال بـ MongoDB بنجاح!");
+    console.log("✅ تم الاتصال بـ MongoDB بنجاح!");
 }).catch(err => {
-    console.error("فشل الاتصال بقاعدة البيانات:", err);
+    console.error("❌ فشل الاتصال بقاعدة البيانات:", err);
 });
-/ إعداد نظام الرسائل مع حذف تلقائي بعد 12 ساعة
+
+// تعريف شكل بيانات الرسالة (Schema)
 const msgSchema = new mongoose.Schema({
     user: String,
-    txt: String,
-    createdAt: { type: Date, default: Date.now, expires: 43200 } 
+    message: String,
+    timestamp: { type: Date, default: Date.now }
 });
+
 const Message = mongoose.model('Message', msgSchema);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', async (socket) => {
+    console.log('مستخدم جديد اتصل بالدردشة');
+
+    // جلب آخر 50 رسالة من القاعدة عند دخول مستخدم جديد
     try {
-        // تحميل الرسائل القديمة فور دخول المستخدم
-        const oldMessages = await Message.find().sort({ _id: 1 });
-        socket.emit('load messages', oldMessages);
+        const messages = await Message.find().sort({ timestamp: 1 }).limit(50);
+        socket.emit('load messages', messages);
     } catch (err) {
-        console.error("خطأ في جلب البيانات:", err);
+        console.error("خطأ في جلب الرسائل:", err);
     }
 
+    // استقبال رسالة جديدة وحفظها
     socket.on('chat message', async (data) => {
-        const newMsg = new Message({ user: data.user, txt: data.txt });
-        await newMsg.save();
-        io.emit('chat message', data); 
+        const newMessage = new Message({
+            user: data.user,
+            message: data.message
+        });
+
+        try {
+            await newMessage.save();
+            io.emit('chat message', data); // إرسال الرسالة للجميع بعد التأكد من حفظها
+        } catch (err) {
+            console.error("خطأ في حفظ الرسالة:", err);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('أحد المستخدمين غادر الدردشة');
     });
 });
 
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 السيرفر يعمل الآن على المنفذ ${PORT}`);
 });
