@@ -1,27 +1,17 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- رابط المانيفست -->
-<link rel="manifest" href="/manifest.json">
-<!-- لون الشريط العلوي في الجوال -->
-<meta name="theme-color" content="#0088cc">
-<!-- تعريف الأيقونة للأيفون -->
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5962/5962463.png">
-
-<script>
-  // تسجيل السيرفس وركر
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker Registered!'))
-        .catch(err => console.log('Service Worker Failed', err));
-    });
-  }
-</script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>دردشة وائل | WAEL CHAT</title>
+    
+    <!-- إعدادات PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0088cc">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5962/5962463.png">
+
     <style>
         :root {
             --primary-color: #0088cc;
@@ -34,12 +24,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
 
-        /* تعديل أساسي لضمان ثبات العناصر */
-        html, body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden; /* يمنع الصفحة كاملة من السحب */
-        }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
 
         body { 
             background-color: var(--bg-dark); 
@@ -48,7 +33,6 @@
             flex-direction: column; 
         }
 
-        /* رأس الصفحة الثابت */
         header { 
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
@@ -57,14 +41,13 @@
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0; /* يمنع الرأس من الانكماش */
+            flex-shrink: 0;
         }
 
         header h2 { font-size: 1rem; color: var(--primary-color); }
         .status { font-size: 0.7rem; color: #22c55e; display: flex; align-items: center; gap: 5px; }
         .status::before { content: ''; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; }
 
-        /* منطقة الرسائل - هي الوحيدة التي تتحرك */
         #chat-container { 
             flex: 1; 
             overflow-y: auto; 
@@ -77,15 +60,7 @@
         }
 
         .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
-        
-        .msg-box { 
-            padding: 8px 14px; 
-            border-radius: 15px; 
-            font-size: 0.9rem; 
-            word-wrap: break-word;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
+        .msg-box { padding: 8px 14px; border-radius: 15px; font-size: 0.9rem; word-wrap: break-word; }
         .user-name { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; }
 
         .mine { align-self: flex-end; }
@@ -96,7 +71,6 @@
         .others .msg-box { background: var(--other-msg); color: white; border-bottom-left-radius: 2px; }
         .others .user-name { color: #94a3b8; }
 
-        /* شريط الإدخال الثابت في الأسفل */
         footer { 
             background: #1e293b; 
             padding: 10px; 
@@ -104,44 +78,14 @@
             align-items: center;
             gap: 10px;
             border-top: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0; /* يمنع الفوتر من الاختفاء */
-        }
-
-        .input-group {
-            flex: 1;
-            display: flex;
-            background: #334155;
-            border-radius: 20px;
-            align-items: center;
-            padding: 0 10px;
-        }
-
-        #userName { 
-            border: none; background: transparent; color: #0088cc;
-            width: 55px; font-weight: bold; border-left: 1px solid #475569;
-            outline: none; font-size: 0.85rem; padding: 8px 0;
-        }
-
-        #messageInput { 
-            flex: 1; border: none; background: transparent; color: white; 
-            padding: 10px; outline: none; font-size: 0.9rem;
-        }
-
-        #sendBtn { 
-            background: var(--primary-color); 
-            border: none; 
-            width: 40px; height: 40px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
 
+        .input-group { flex: 1; display: flex; background: #334155; border-radius: 20px; align-items: center; padding: 0 10px; }
+        #userName { border: none; background: transparent; color: #0088cc; width: 55px; font-weight: bold; border-left: 1px solid #475569; outline: none; font-size: 0.85rem; padding: 8px 0; }
+        #messageInput { flex: 1; border: none; background: transparent; color: white; padding: 10px; outline: none; font-size: 0.9rem; }
+        #sendBtn { background: var(--primary-color); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         #sendBtn svg { fill: white; width: 18px; height: 18px; transform: rotate(180deg); }
-
-        /* سكرول بار بسيط */
-        #chat-container::-webkit-scrollbar { width: 3px; }
-        #chat-container::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
 <body>
@@ -151,9 +95,7 @@
         <div class="status">متصل الآن</div>
     </header>
     
-    <div id="chat-container">
-        <!-- الرسائل ستظهر هنا -->
-    </div>
+    <div id="chat-container"></div>
 
     <footer>
         <div class="input-group">
@@ -167,28 +109,28 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // تسجيل Service Worker للـ PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
+            });
+        }
+
         const socket = io();
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('userName');
         const msgInput = document.getElementById('messageInput');
 
-        // استعادة الاسم المحفوظ
         if(localStorage.getItem('wael-chat-name')) {
             userInput.value = localStorage.getItem('wael-chat-name');
         }
 
         function appendMessage(data) {
-            if(!data.user || !data.message) return; // منع الـ undefined
-
+            if(!data.user || !data.message) return;
             const wrapper = document.createElement('div');
             const isMine = userInput.value.trim() === data.user;
-            
             wrapper.className = `msg-wrapper ${isMine ? 'mine' : 'others'}`;
-            wrapper.innerHTML = `
-                <span class="user-name">${data.user}</span>
-                <div class="msg-box">${data.message}</div>
-            `;
-            
+            wrapper.innerHTML = `<span class="user-name">${data.user}</span><div class="msg-box">${data.message}</div>`;
             chatContainer.appendChild(wrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
@@ -205,7 +147,6 @@
         function sendMessage() {
             const user = userInput.value.trim();
             const message = msgInput.value.trim();
-            
             if (user && message) {
                 localStorage.setItem('wael-chat-name', user);
                 socket.emit('chat message', { user, message });
@@ -214,9 +155,7 @@
             }
         }
 
-        msgInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") sendMessage();
-        });
+        msgInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
     </script>
 </body>
 </html>
