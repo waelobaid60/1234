@@ -5,13 +5,13 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/5962/5962463.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
   "background_color": "#0f172a",
   "display": "standalone",
   "scope": "/",
-  "theme_color": "#0088cc",
-  "description": "تطبيق دردشة احترافي متصل بـ MongoDB"
+  "theme_color": "#0088cc"
 }
