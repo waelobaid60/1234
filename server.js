@@ -12,8 +12,7 @@ const io = new Server(server);
 const PORT = 8080; 
 
 // الرابط النهائي المعتمد على بيانات الصورة 31407.jpg
-const mongoURI = "mongodb+srv://admin:Wael2026@cluster0.pwloqvx.mongodb.net/?appName=Cluster0";
-
+const mongoURI = "mongodb+srv://admin:Wael2026@cluster0.pwloqvx.mongodb.net/chatDB?retryWrites=true&w=majority&appName=Cluster0";
 // إعداد نظام الرسائل مع حذف تلقائي بعد 12 ساعة
 const msgSchema = new mongoose.Schema({
     user: String,
